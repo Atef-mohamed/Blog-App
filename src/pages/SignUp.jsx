@@ -13,12 +13,13 @@ import {
   InputGroup,
   InputRightElement,
   FormHelperText,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useUserRegisterMutation } from "../app/features/userSLice/userApiSlice";
-export default function SignUp() {
+export default function SignUp({ isAuthenticated }) {
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -31,8 +32,13 @@ export default function SignUp() {
   const [isConfirmPassword, setIsConfirmPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const bg = useColorModeValue("white", "gray.800");
+  const bg1 = useColorModeValue("gray.50", "gray.900");
+  const bg2 = useColorModeValue("gray.100", "gray.700");
 
-  const [registerUser, { isLoading, error }] = useUserRegisterMutation();
+  const [registerUser, { isLoading }] = useUserRegisterMutation();
+  const navigate = useNavigate();
+  const toast = useToast();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,30 +78,53 @@ export default function SignUp() {
       return;
     }
     setIsConfirmPassword(false);
-
-    const result = await registerUser({
-      name: user.name,
-      email: user.email,
-      password: user.password,
-    }).unwrap();
-    console.log(result);
+    try {
+      const result = await registerUser({
+        name: user.name,
+        email: user.email,
+        password: user.password,
+      }).unwrap();
+      toast({
+        title: "SignUp Successful",
+        description: `Welcome ${
+          result.user?.name || "User"
+        }! Please login to continue.`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      setTimeout(() => {
+        navigate("/login");
+        window.location.reload();
+      }, 2000);
+      console.log(result);
+    } catch (error) {
+      toast({
+        title: "Register Failed",
+        description: error?.data || "Something went wrong",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+    }
     console.log(user);
   };
+
+  // Redirect if authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <Flex
-      minH="80vh"
-      align="center"
-      justify="center"
-      bg={useColorModeValue("gray.50", "gray.900")}
-      px={4}
-      py={10}
-    >
+    <Flex minH="80vh" align="center" justify="center" bg={bg1} px={4} py={10}>
       <Flex
         w={{ base: "100%", md: "900px" }}
         borderRadius="xl"
         boxShadow="2xl"
         overflow="hidden"
-        bg={useColorModeValue("white", "gray.800")}
+        bg={bg}
       >
         {/* Left side: Image */}
         <Flex flex={1} display={{ base: "none", md: "block" }}>
@@ -121,7 +150,7 @@ export default function SignUp() {
                 <Input
                   type="text"
                   focusBorderColor="blue.400"
-                  bg={useColorModeValue("gray.100", "gray.700")}
+                  bg={bg2}
                   isInvalid={isName}
                   errorBorderColor="crimson"
                   name={"name"}
@@ -138,7 +167,7 @@ export default function SignUp() {
                 <Input
                   type="email"
                   focusBorderColor="blue.400"
-                  bg={useColorModeValue("gray.100", "gray.700")}
+                  bg={bg2}
                   isInvalid={isEmail}
                   errorBorderColor="crimson"
                   name={"email"}
@@ -156,7 +185,7 @@ export default function SignUp() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     focusBorderColor="blue.400"
-                    bg={useColorModeValue("gray.100", "gray.700")}
+                    bg={bg2}
                     isInvalid={isPassword}
                     errorBorderColor="crimson"
                     name={"password"}
@@ -190,7 +219,7 @@ export default function SignUp() {
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     focusBorderColor="blue.400"
-                    bg={useColorModeValue("gray.100", "gray.700")}
+                    bg={bg2}
                     isInvalid={isConfirmPassword}
                     errorBorderColor="crimson"
                     name={"confirmPassword"}

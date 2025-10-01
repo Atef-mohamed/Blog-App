@@ -7,10 +7,17 @@ export const postApiSlice = createApi({
   endpoints: (builder) => ({
     getPosts: builder.query({
       query: () => ({
-        url: "/posts",
+        url: "/posts?_expand=user",
       }),
+    }),
+    deletePost: builder.mutation({
+      query: (id) => ({
+        url: `/posts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Posts"],
     }),
   }),
 });
 
-export const {useGetPostsQuery} = postApiSlice;
+export const { useGetPostsQuery, useDeletePostMutation } = postApiSlice;

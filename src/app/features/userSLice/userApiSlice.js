@@ -3,20 +3,18 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const userApiSlice = createApi({
   reducerPath: "AuthApi",
   tagTypes: ["User"],
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://blog-back-production-f88f.up.railway.app",
-  }),
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000" }),
   endpoints: (builder) => ({
     userLogin: builder.mutation({
       query: (data) => ({
-        url: "/users",
+        url: "/login",
         method: "POST",
         body: data,
       }),
     }),
     userRegister: builder.mutation({
       query: (data) => ({
-        url: "/users",
+        url: "/register",
         method: "POST",
         body: { name: data.name, email: data.email, password: data.password },
       }),
