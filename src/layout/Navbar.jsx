@@ -19,7 +19,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CookieService from "../services/cookies";
 import { FiBell, FiChevronDown } from "react-icons/fi";
 import CustomAlertDailog from "../shared/CustomAlertDailog";
@@ -29,13 +29,14 @@ export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const bg = useColorModeValue("white", "gray.900");
   const bg2 = useColorModeValue("gray.200", "gray.700");
-
+  const navigate = useNavigate();
   const user = CookieService.get("user");
 
   const onOkHandler = () => {
     CookieService.remove("jwt", { path: "/" });
     CookieService.remove("user", { path: "/" });
-    window.location.reload();
+    onClose();
+    navigate("/login");
   };
 
   return (

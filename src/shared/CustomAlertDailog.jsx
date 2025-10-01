@@ -15,9 +15,10 @@ export default function CustomAlertDailog({
   onClose,
   title,
   description,
-  cancelTxt="Cancel",
+  cancelTxt = "Cancel",
   okTxt,
   onOkHandler,
+  isLoading = false,
 }) {
   const cancelRef = React.useRef();
 
@@ -40,7 +41,12 @@ export default function CustomAlertDailog({
             <Button ref={cancelRef} onClick={onClose}>
               {cancelTxt}
             </Button>
-            <Button colorScheme="red" ml={3} onClick={onOkHandler}>
+            <Button
+              colorScheme="red"
+              ml={3}
+              onClick={onOkHandler}
+              isLoading={isLoading}
+            >
               {okTxt}
             </Button>
           </AlertDialogFooter>

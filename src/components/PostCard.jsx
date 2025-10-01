@@ -11,25 +11,49 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import CookieService from "../services/cookies";
 import { useDeletePostMutation } from "../app/features/postsSlice/PostApiSlice";
 import CustomAlertDailog from "../shared/CustomAlertDailog";
+import { useEffect } from "react";
+
 const PostCard = ({ id, title, image, description, user }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const loggedUser = CookieService.get("user");
   const isOwner = loggedUser && loggedUser.id === user?.id;
-  const [destroyPost, { isLoading: isDestroy, isSuccess }] =
+  const [destroyPost, { isLoading: isDestroy ,isSuccess }] =
     useDeletePostMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose();
+      toast({
+        title: "Deleted Successfully",
+        description: `Blog with id, ${id} deleted!`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+  }, [isSuccess]);
 
   const handleDelete = async () => {
     try {
       await destroyPost(id).unwrap();
-      console.log("Post deleted:", id);
     } catch (err) {
-      console.error("Failed to delete post:", err);
+      toast({
+        title: "Deleted Failed",
+        description: err?.data || "Something went wrong",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
     }
   };
   return (
@@ -115,6 +139,7 @@ const PostCard = ({ id, title, image, description, user }) => {
         title="Are You Sure?"
         description="You want to delete this post!"
         okTxt="Delete"
+        isLoading={isDestroy}
         onOkHandler={handleDelete}
       />
     </>
