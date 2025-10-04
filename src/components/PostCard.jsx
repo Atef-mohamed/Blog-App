@@ -5,35 +5,54 @@ import {
   CardBody,
   CardFooter,
   Flex,
+  FormControl,
+  FormLabel,
   Heading,
   IconButton,
   Image,
+  Input,
   Text,
+  Textarea,
   useColorModeValue,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import CookieService from "../services/cookies";
-import { useDeletePostMutation } from "../app/features/postsSlice/PostApiSlice";
+import {
+  useDeletePostMutation,
+  useUpdatePostMutation,
+} from "../app/features/postsSlice/PostApiSlice";
 import CustomAlertDailog from "../shared/CustomAlertDailog";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import CustomModal from "../shared/Modal";
+import { uploadImageToImgBB } from "../services/uploadImageToImageBB";
 
 const PostCard = ({ id, title, image, description, user }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const loggedUser = CookieService.get("user");
   const isOwner = loggedUser && loggedUser.id === user?.id;
-  const [destroyPost, { isLoading: isDestroy ,isSuccess }] =
+
+  const [postToEdit, setPostToEdit] = useState(null);
+  const [postImage, setPostImage] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [destroyPost, { isLoading: isDestroy, isSuccess }] =
     useDeletePostMutation();
+
+  const [updatePost, { isLoading: isUpdate }] = useUpdatePostMutation();
+  const {
+    isOpen: isModalOpen,
+    onOpen: onModalOpen,
+    onClose: onModalClose,
+  } = useDisclosure();
 
   useEffect(() => {
     if (isSuccess) {
       onClose();
       toast({
         title: "Deleted Successfully",
-        description: `Blog with id, ${id} deleted!`,
+        description: `{Post ${id} deleted!`,
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -42,9 +61,14 @@ const PostCard = ({ id, title, image, description, user }) => {
     }
   }, [isSuccess]);
 
+  const handlePostToEdit = (e) => {
+    const { name, value } = e.target;
+    setPostToEdit({ ...postToEdit, [name]: value });
+  };
   const handleDelete = async () => {
     try {
       await destroyPost(id).unwrap();
+
     } catch (err) {
       toast({
         title: "Deleted Failed",
@@ -56,6 +80,54 @@ const PostCard = ({ id, title, image, description, user }) => {
       });
     }
   };
+  const handlePostImage = (e) => {
+    setPostImage(e.target.files[0]);
+  };
+
+  const handleSubmitPostToEdit = async () => {
+    try {
+      setIsUploading(true);
+      let imageUrl = postToEdit.image;
+      if (postImage) {
+        imageUrl = await uploadImageToImgBB(postImage);
+      }
+
+      const updatedData = {
+        title: postToEdit.title,
+        description: postToEdit.description,
+        userId: loggedUser?.id,
+        image: imageUrl,
+      };
+
+      await updatePost({
+        id: postToEdit?.id,
+        postData: updatedData,
+      }).unwrap();
+
+      toast({
+        title: "Updated Successfully",
+        description: `Post "${postToEdit.title}" has been updated!`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+
+      onModalClose();
+    } catch (err) {
+      toast({
+        title: "Update Failed",
+        description: err?.data || "Something went wrong",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <>
       <Card
@@ -114,6 +186,10 @@ const PostCard = ({ id, title, image, description, user }) => {
           {isOwner && (
             <Flex gap={2}>
               <IconButton
+                onClick={() =>
+                  onModalOpen() &
+                  setPostToEdit({ id, title, image, description })
+                }
                 aria-label="Edit Post"
                 icon={<FiEdit />}
                 size="md"
@@ -142,6 +218,45 @@ const PostCard = ({ id, title, image, description, user }) => {
         isLoading={isDestroy}
         onOkHandler={handleDelete}
       />
+
+      <CustomModal
+        isOpen={isModalOpen}
+        onClose={onModalClose}
+        title={"Update Post"}
+        txtOk={"Update"}
+        isLoading={isUpdate || isUploading}
+        onOkClick={handleSubmitPostToEdit}
+      >
+        <FormControl>
+          <FormLabel>Title</FormLabel>
+          <Input
+            placeholder="Post Title"
+            name="title"
+            value={postToEdit?.title}
+            onChange={handlePostToEdit}
+          />
+        </FormControl>
+        <FormControl my="3">
+          <FormLabel>Description</FormLabel>
+          <Textarea
+            placeholder="enter your description"
+            name="description"
+            value={postToEdit?.description}
+            onChange={handlePostToEdit}
+          />
+        </FormControl>
+        <FormControl my="3">
+          <FormLabel>Image</FormLabel>
+          <Input
+            onChange={handlePostImage}
+            id="image"
+            type="file"
+            h={"full"}
+            p={2}
+            accept="image/png, image/gif, image/jpeg, image/jpg"
+          />
+        </FormControl>
+      </CustomModal>
     </>
   );
 };

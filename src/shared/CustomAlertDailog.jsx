@@ -31,7 +31,10 @@ export default function CustomAlertDailog({
         isOpen={isOpen}
         isCentered
       >
-        <AlertDialogOverlay />
+        <AlertDialogOverlay
+          bg="blackAlpha.500"
+          backdropFilter="blur(5px) hue-rotate(20deg)"
+        />
 
         <AlertDialogContent>
           <AlertDialogHeader>{title}</AlertDialogHeader>

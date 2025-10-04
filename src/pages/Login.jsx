@@ -69,6 +69,7 @@ export default function Login({ isAuthenticated }) {
         expires: date,
       });
       CookieService.set("user", JSON.stringify(result.user), { path: "/" });
+
       toast({
         title: "Login Successful",
         description: `Welcome back, ${result.user?.name || "User"}!`,
@@ -80,8 +81,8 @@ export default function Login({ isAuthenticated }) {
       setTimeout(() => {
         navigate("/");
         window.location.reload();
-      }, 2000);
-      console.log(result);
+      }, 1500);
+
     } catch (error) {
       toast({
         title: "Login Failed",
@@ -92,10 +93,11 @@ export default function Login({ isAuthenticated }) {
         position: "top",
       });
     }
-    console.log(user);
   };
+
   // Redirect if authenticated
   if (isAuthenticated) return <Navigate to="/" replace />;
+  
   return (
     <Flex
       minH="calc(100vh - 4rem)"

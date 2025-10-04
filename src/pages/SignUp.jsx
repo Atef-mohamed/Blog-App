@@ -84,6 +84,7 @@ export default function SignUp({ isAuthenticated }) {
         email: user.email,
         password: user.password,
       }).unwrap();
+      
       toast({
         title: "SignUp Successful",
         description: `Welcome ${
@@ -97,8 +98,8 @@ export default function SignUp({ isAuthenticated }) {
       setTimeout(() => {
         navigate("/login");
         window.location.reload();
-      }, 2000);
-      console.log(result);
+      }, 1500);
+
     } catch (error) {
       toast({
         title: "Register Failed",
@@ -109,7 +110,6 @@ export default function SignUp({ isAuthenticated }) {
         position: "top",
       });
     }
-    console.log(user);
   };
 
   // Redirect if authenticated

@@ -1,15 +1,13 @@
 import PostCard from "../components/PostCard";
-import { SimpleGrid } from "@chakra-ui/react";
 import { Box, Flex } from "@chakra-ui/react";
 import { useGetPostsQuery } from "../app/features/postsSlice/PostApiSlice";
 import PostSkeleton from "../components/PostSkeleton";
-import AddPostButton from "../components/AddPostButton";
-import { useNavigate } from "react-router-dom";
+import AddPost from "../components/AddPost";
+import CookieService from "../services/cookies";
+
 const HomePage = () => {
   const { data: posts, isLoading } = useGetPostsQuery();
-  const navigate = useNavigate();
-  // console.log(posts);
-  
+  const isLoggedIn = CookieService.get("jwt");
   if (isLoading)
     return (
       <Flex
@@ -24,7 +22,7 @@ const HomePage = () => {
         ))}
       </Flex>
     );
-
+  const sortedPosts = [...posts].sort((a, b) => b.id - a.id);
   return (
     <>
       <Flex
@@ -34,11 +32,12 @@ const HomePage = () => {
         gap={6}
         marginTop={10}
       >
-        {posts.map((post) => (
+        {sortedPosts.map((post) => (
           <PostCard key={post.id} {...post} />
         ))}
       </Flex>
-      <AddPostButton onClick={() => navigate("/add-post")} />
+      {isLoggedIn && <AddPost />}
+
     </>
   );
 };
