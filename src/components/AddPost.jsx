@@ -112,7 +112,7 @@ const AddPost = () => {
         isOpen={isOpen}
         onClose={onClose}
         title={"Add Post"}
-        txtOk={"Create"}
+        txtOk={"Add Post"}
         isLoading={isAdd || isUploading}
         onOkClick={handleSubmit}
       >

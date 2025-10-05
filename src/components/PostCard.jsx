@@ -52,7 +52,7 @@ const PostCard = ({ id, title, image, description, user }) => {
       onClose();
       toast({
         title: "Deleted Successfully",
-        description: `{Post ${id} deleted!`,
+        description: `Post ${id} deleted!`,
         status: "success",
         duration: 3000,
         isClosable: true,
